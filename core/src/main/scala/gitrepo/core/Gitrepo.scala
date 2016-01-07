@@ -55,6 +55,7 @@ class Gitrepo(
   def push(message: String) = {
     actorSystem.log.info(s"performing push")
     git.add().addFilepattern(".").call()
+    git.add().addFilepattern(".").setUpdate(true).call()
     git.commit().setMessage(s"${message} file(s) uploaded").call()
     val pushResult = git.push().setCredentialsProvider(credentials).call()
     actorSystem.log.info(s"pushresult ${pushResult.map(_.getRemoteUpdates)}")
@@ -71,10 +72,10 @@ class Gitrepo(
       files.foreach { case Upload(target, content) =>
         target.getParentFile.mkdirs()
         Files.move(content.toPath, target.toPath, StandardCopyOption.REPLACE_EXISTING)
+
+        target.getParentFile /
       }
-      git.add().addFilepattern(".").call()
-      git.commit().setMessage(s"${files.size} file(s) uploaded").call()
-      git.push().setCredentialsProvider(credentials).call()
+      push(s"${files.size} file(s) uploaded")
 
     }).andThen({ case result =>
       actorSystem.log.info(s"${result} procesing ${files.map(_.target)}")
@@ -96,14 +97,14 @@ class Gitrepo(
 
   val route =
     put {
-      extractUnmatchedPath { path =>
+      path(Segment / Segments) { case (repo, groupList :+ artifactId :+ version :+ fileName) =>
         extractMaterializer { materializer =>
           extractRequest { req =>
+            val target = workDir / repo / groupList.mkString("/") / artifactId / version / fileName
 
-            val target = workDir / path.toString()
             val content = Files.createTempFile("gitrepo", "upload").toFile
 
-            val sink = StreamConverters.fromOutputStream( () => new FileOutputStream(content) )
+            val sink = StreamConverters.fromOutputStream(() => new FileOutputStream(content))
 
             val result = req.entity.getDataBytes()
               .runWith(sink, materializer)
@@ -117,7 +118,9 @@ class Gitrepo(
         }
       }
     } ~
-    getFromBrowseableDirectory(workDir.absolutePath)
+    logRequestResult("GET", akka.event.Logging.InfoLevel) {
+      getFromBrowseableDirectory(workDir.absolutePath)
+    }
 
   def shutdown() = {
     committer ! PoisonPill
