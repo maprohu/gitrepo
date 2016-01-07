@@ -72,8 +72,6 @@ class Gitrepo(
       files.foreach { case Upload(target, content) =>
         target.getParentFile.mkdirs()
         Files.move(content.toPath, target.toPath, StandardCopyOption.REPLACE_EXISTING)
-
-        target.getParentFile /
       }
       push(s"${files.size} file(s) uploaded")
 
