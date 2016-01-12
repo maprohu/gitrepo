@@ -48,17 +48,17 @@ lazy val testingLib = project
     }
   )
 
-lazy val testingDeps = project
-  .settings(
-    commonSettings,
-    resolvers ++= Seq(
-      snapshots,
-      releases
-    ),
-    libraryDependencies := Seq(
-      (organization in testingLib).value % (name in testingLib).value % (version in testingLib).value
-    )
-
-
-  )
+//lazy val testingDeps = project
+//  .settings(
+//    commonSettings,
+//    resolvers ++= Seq(
+//      snapshots,
+//      releases
+//    ),
+//    libraryDependencies := Seq(
+//      (organization in testingLib).value % (name in testingLib).value % (version in testingLib).value
+//    )
+//
+//
+//  )
 
