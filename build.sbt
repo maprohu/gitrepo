@@ -1,11 +1,15 @@
 val osgirxVersion = "0.1.3-SNAPSHOT"
 val akkaHttpVersion = "2.0.1"
-val sbtVersion = "1.0.0-M3"
+//val sbtVersion = "1.0.0-M3"
 
 val commonSettings = Seq(
   organization := "com.github.maprohu",
   scalaVersion := "2.11.7",
-  crossPaths := false
+  crossPaths := false,
+  resolvers ++= Seq(
+    Resolver.typesafeIvyRepo("releases")
+
+  )
 )
 
 lazy val core = project
@@ -13,7 +17,7 @@ lazy val core = project
     commonSettings,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
-      "org.scala-sbt" %% "io" % sbtVersion,
+      "org.scala-sbt" %% "io" % "1.0.0-M3",
       "org.eclipse.jgit" % "org.eclipse.jgit" % "4.1.1.201511131810-r",
       "org.apache.maven" % "maven-repository-metadata" % "3.3.9"
     )
@@ -62,3 +66,13 @@ lazy val testingLib = project
 //
 //  )
 
+
+lazy val deploy = project
+  .settings(
+    commonSettings,
+    scalaVersion := "2.10.4",
+    libraryDependencies ++= Seq(
+      "org.scala-sbt" % "main" % sbtVersion.value
+//      "org.scala-lang.modules" %% "scala-xml" % "1.0.5"
+    )
+  )
